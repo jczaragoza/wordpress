@@ -1,32 +1,32 @@
-version: '3.8'
-
+version: '2'
 services:
-  db:
-    container_name: w_db1    
-    image: mysql:8.0.22
+  mariadb:
+    image: docker.io/bitnami/mariadb:10.6
     volumes:
-    - ./mysql:/var/lib/mysql
+      - 'mariadb_data:/bitnami/mariadb'
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=bn_wordpress
+      - MARIADB_DATABASE=bitnami_wordpress
+  wordpress:
+    image: docker.io/bitnami/wordpress:5
     ports:
-      - "4306:3306"
-    restart: unless-stopped
-    MYSQL_ROOT_PASSWORD: mabjuan007
-    MYSQL_DATABASE: wordpress
-    MYSQL_USER: userwp
-    MYSQL_PASSWORD: mabjuan007
-
-wordpress:
-    container_name: wp1
-    image: wordpress:latest       
+      - '8300:8080'
+      - '4306:8443'
+    volumes:
+      - 'wordpress_data:/bitnami/wordpress'
     depends_on:
-      - db
-    volumes:
-      - ./src/themes:/var/www/html/wp-content/themes
-      - ./src/plugins:/var/www/html/wp-content/plugins
-      - ./src/uploads:/var/www/html/wp-content/uploads
-    ports:
-      - "8300:80"
-    restart: unless-stopped
-    WORDPRESS_DB_HOST: db
-    WORDPRESS_DB_USER: userwp
-    WORDPRESS_DB_PASSWORD: mabjuan007
-    WORDPRESS_TABLE_PREFIX: 'myn_'
+      - mariadb
+    environment:
+      # ALLOW_EMPTY_PASSWORD is recommended only for development.
+      - ALLOW_EMPTY_PASSWORD=yes
+      - WORDPRESS_DATABASE_HOST=mariadb
+      - WORDPRESS_DATABASE_PORT_NUMBER=3306
+      - WORDPRESS_DATABASE_USER=bn_wordpress
+      - WORDPRESS_DATABASE_NAME=bitnami_wordpress
+volumes:
+  mariadb_data:
+    driver: local
+  wordpress_data:
+    driver: local
