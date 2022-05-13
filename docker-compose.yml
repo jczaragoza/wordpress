@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    container_name: w_db1    
+    image: mysql:8.0.22
+    volumes:
+    - ./mysql:/var/lib/mysql
+    ports:
+      - "4306:3306"
+    restart: unless-stopped
+    MYSQL_ROOT_PASSWORD: mabjuan007
+    MYSQL_DATABASE: wordpress
+    MYSQL_USER: userwp
+    MYSQL_PASSWORD: mabjuan007
+
+wordpress:
+    container_name: wp1
+    image: wordpress:latest       
+    depends_on:
+      - db
+    volumes:
+      - ./src/themes:/var/www/html/wp-content/themes
+      - ./src/plugins:/var/www/html/wp-content/plugins
+      - ./src/uploads:/var/www/html/wp-content/uploads
+    ports:
+      - "8300:80"
+    restart: unless-stopped
+    WORDPRESS_DB_HOST: db
+    WORDPRESS_DB_USER: userwp
+    WORDPRESS_DB_PASSWORD: mabjuan007
+    WORDPRESS_TABLE_PREFIX: 'myn_'
